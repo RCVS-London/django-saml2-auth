@@ -15,6 +15,7 @@ from pkg_resources import parse_version
 from django.conf import settings
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
+from django.contrib import auth
 from django.contrib.auth import login, logout, get_user_model
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
@@ -190,6 +191,8 @@ def acs(r):
 
     if target_user.is_active:
         target_user.backend = getattr(settings, 'AUTHENTICATION_BACKENDS[0]', 'django.contrib.auth.backends.ModelBackend')
+        if target_user.backend != 'django.contrib.auth.backends.ModelBackend':
+            auth.authenticate(r, username=user_name)
         login(r, target_user)
     else:
         return HttpResponseRedirect(get_reverse([denied, 'denied', 'django_saml2_auth:denied']))
